@@ -16,6 +16,7 @@ import logging
 import os
 import re
 from pathlib import Path
+from urllib.parse import urlsplit, urlunsplit
 
 from openai import OpenAI
 
@@ -250,6 +251,37 @@ def _reasoning_effort() -> str | None:
         values = ", ".join(sorted(allowed))
         raise ValueError(f"REDTEAM_REASONING_EFFORT must be one of: {values}")
     return raw
+
+
+def generation_settings(*, temperature: float = 0.2) -> dict[str, object]:
+    """Return safe, serializable settings for a generation run log."""
+    parsed = urlsplit(BASE_URL)
+    safe_base_url = urlunsplit((parsed.scheme, parsed.netloc, parsed.path, "", ""))
+    settings: dict[str, object] = {
+        "provider": PROVIDER,
+        "base_url": safe_base_url,
+        "model": MODEL,
+        "temperature": temperature,
+    }
+    configuration_errors: list[str] = []
+    try:
+        settings.update(_completion_limits())
+    except ValueError as exc:
+        configuration_errors.append(str(exc))
+        for name in ("REDTEAM_MAX_TOKENS", "REDTEAM_MAX_COMPLETION_TOKENS"):
+            value = os.environ.get(name, "").strip()
+            if value:
+                settings[name] = value
+    try:
+        reasoning_effort = _reasoning_effort()
+    except ValueError as exc:
+        configuration_errors.append(str(exc))
+        reasoning_effort = os.environ.get("REDTEAM_REASONING_EFFORT", "").strip()
+    if reasoning_effort:
+        settings["reasoning_effort"] = reasoning_effort
+    if configuration_errors:
+        settings["configuration_errors"] = configuration_errors
+    return settings
 
 
 def llm_json(prompt: str, system: str, *, temperature: float = 0.2) -> dict:

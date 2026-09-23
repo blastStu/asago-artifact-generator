@@ -11,6 +11,7 @@ uv sync --locked
 ./scripts/quality.sh
 uv run pytest tests/ -q
 asago-artifact-generator generate -v
+asago-artifact-generator report --output runs/report.html
 ```
 
 Deterministic tests do not require an LLM endpoint. Live generation requires
@@ -27,6 +28,8 @@ via `.env` or environment variables.
 - `examples/scenarios/` contains committed input scenario YAMLs.
 - `examples/demo/` contains the interactive Jupyter walkthrough and runtime.
 - `runs/` holds generated artifacts (gitignored).
+- `report.py` renders the self-contained HTML report; `run_log.py` persists
+  non-secret generation metadata; `report_assets/` contains the Asago logo.
 
 Read `README.md` before changing the pipeline interface. Each platform
 generator lives in its own subpackage (`garak/`, future `agentdojo/`, `pyrit/`)

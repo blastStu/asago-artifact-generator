@@ -4,14 +4,18 @@ from __future__ import annotations
 
 import json
 import logging
+import time
 from pathlib import Path
 from typing import Annotated
 
 import typer
 
+from . import llm as llm_mod
 from .extract import load_scenario
 from .garak.gen import generate_artifact, list_scenario_files
 from .garak.spec_io import MANIFEST_FILE, runs_dir
+from .report import render_report
+from .run_log import new_generation_log, utc_timestamp, write_generation_log
 
 app = typer.Typer(
     help="Policy-driven agentic red-teaming artifact generator.",
@@ -77,6 +81,10 @@ def generate(
         typer.echo("No scenario files found.", err=True)
         raise typer.Exit(1)
 
+    run_log = new_generation_log(
+        llm_mod.generation_settings(),
+        scenario_count=len(paths),
+    )
     manifest: list[dict] = []
     coverage_counts = {"full": 0, "partial": 0, "skip": 0}
     validation_failed = 0
@@ -84,6 +92,12 @@ def generate(
     failed = False
 
     for path in paths:
+        scenario_started = time.monotonic()
+        log_entry = {
+            "scenario_id": path.stem,
+            "source_path": str(path),
+            "started_at": utc_timestamp(),
+        }
         try:
             ctx = load_scenario(path)
             result = generate_artifact(
@@ -93,6 +107,17 @@ def generate(
                 use_llm=not no_llm,
                 force=force,
                 dry_run=dry_run,
+            )
+            log_entry.update(
+                {
+                    "scenario_id": result.scenario_id,
+                    "status": "success" if result.ok else "validation_failed",
+                    "gate_result": result.gate,
+                    "gate_reason": result.gate_reason,
+                    "artifact_path": result.artifact_path,
+                    "attempts": result.attempts,
+                    "attempt_failures": result.attempt_failures,
+                }
             )
             entry = {
                 "scenario_id": result.scenario_id,
@@ -111,6 +136,13 @@ def generate(
                 failed = True
         except Exception as e:
             log.error("ERROR processing %s: %s", path.name, e)
+            log_entry.update(
+                {
+                    "status": "error",
+                    "error_type": type(e).__name__,
+                    "error": str(e),
+                }
+            )
             manifest.append(
                 {
                     "scenario_id": path.stem,
@@ -120,6 +152,10 @@ def generate(
             )
             process_errors += 1
             failed = True
+        finally:
+            log_entry["finished_at"] = utc_timestamp()
+            log_entry["duration_seconds"] = round(time.monotonic() - scenario_started, 3)
+            run_log["scenarios"].append(log_entry)
 
     if not dry_run:
         out = runs_dir(output_dir)
@@ -127,6 +163,14 @@ def generate(
         manifest_path = out / MANIFEST_FILE
         manifest_path.write_text(json.dumps(manifest, indent=2))
         log.info("Manifest written to %s", manifest_path)
+        run_log["finished_at"] = utc_timestamp()
+        run_log["status"] = "failed" if failed else "success"
+        run_log["summary"] = {
+            "validation_failed": validation_failed,
+            "process_errors": process_errors,
+        }
+        log_path = write_generation_log(run_log, out)
+        log.info("Generation log written to %s", log_path)
 
     print(f"\n{'=' * 50}")
     print("Garak artifact generation summary")
@@ -151,6 +195,38 @@ def generate(
 
     if failed:
         raise typer.Exit(1)
+
+
+@app.command()
+def report(
+    scenarios_dir: Annotated[
+        Path,
+        typer.Option("--scenarios-dir", help="Directory containing scenario YAML files."),
+    ] = Path("examples/scenarios"),
+    runs_dir_path: Annotated[
+        Path,
+        typer.Option("--runs-dir", help="Directory containing generated artifacts and logs."),
+    ] = Path("runs"),
+    output: Annotated[
+        Path,
+        typer.Option("--output", help="HTML report path."),
+    ] = Path("runs/report.html"),
+    run_log_path: Annotated[
+        Path | None,
+        typer.Option("--run-log", help="Specific generation log to display."),
+    ] = None,
+) -> None:
+    """Build a navigable HTML report from scenarios, artifacts, and run logs."""
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(
+        render_report(
+            scenarios_dir=scenarios_dir,
+            runs_dir=runs_dir_path,
+            run_log_path=run_log_path,
+        ),
+        encoding="utf-8",
+    )
+    typer.echo(f"Report written to {output}")
 
 
 if __name__ == "__main__":

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Literal
@@ -192,6 +192,8 @@ class ArtifactBuildResult:
     artifact: ScenarioArtifact
     ok: bool
     errors: list[str]
+    attempts: int = 0
+    attempt_failures: list[dict[str, Any]] = field(default_factory=list)
 
 
 def scenario_to_yaml(ctx: ScenarioContext, *, include_narrative: bool = False) -> str:
@@ -342,6 +344,7 @@ def generate_scenario_artifact(
     last_error: Exception | None = None
     last_data: dict[str, Any] | None = None
     last_errors: list[str] = []
+    attempt_failures: list[dict[str, Any]] = []
     feedback = ""
 
     for attempt in range(MAX_GENERATION_ATTEMPTS):
@@ -358,6 +361,9 @@ def generate_scenario_artifact(
                 errors = gate_artifact_errors(parsed, expected_surface=surface)
             last_errors = errors
             if errors:
+                attempt_failures.append(
+                    {"attempt": attempt + 1, "kind": "validation", "errors": list(errors)}
+                )
                 log.warning(
                     "Artifact validation attempt %d failed: %s",
                     attempt + 1,
@@ -372,6 +378,9 @@ def generate_scenario_artifact(
             break
         except Exception as e:
             last_error = e
+            attempt_failures.append(
+                {"attempt": attempt + 1, "kind": "generation", "error": str(e)}
+            )
             log.warning("Artifact generation attempt %d failed: %s", attempt + 1, e)
             feedback = _feedback_block([str(e)])
 
@@ -389,4 +398,10 @@ def generate_scenario_artifact(
 
     if last_errors:
         log.warning("Artifact validation failed: %s", "; ".join(last_errors))
-    return ArtifactBuildResult(artifact=artifact, ok=not last_errors, errors=last_errors)
+    return ArtifactBuildResult(
+        artifact=artifact,
+        ok=not last_errors,
+        errors=last_errors,
+        attempts=MAX_GENERATION_ATTEMPTS,
+        attempt_failures=attempt_failures,
+    )

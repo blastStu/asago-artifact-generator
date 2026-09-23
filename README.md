@@ -89,6 +89,27 @@ asago-artifact-generator generate -v
 | `--output-dir DIR` | Override default `runs/` output directory |
 | `-v` | Verbose logging |
 
+## HTML reports
+
+Build a self-contained, interactive report from the scenario YAMLs, generated
+artifacts, validation sidecars, and the latest generation log:
+
+```bash
+asago-artifact-generator report --output runs/report.html
+```
+
+Open `runs/report.html` in a browser. The report starts with a high-level
+summary, then lets readers expand each scenario to see the human-readable
+threat description, transcript, highlighted adversarial turn, detector rubric,
+validation details, raw data, and explanations of what each section means.
+It embeds the Asago logo and has no external runtime dependencies.
+
+Generation runs also write a timestamped, non-secret log under
+`runs/generation-log/`. It records the provider, sanitized endpoint, model,
+temperature, token limit, reasoning effort, scenario outcomes, attempt
+failures, validation errors, and durations. API keys, full prompts, and raw
+model responses are not written to the log.
+
 ### Pipeline
 
 1. **Classify** injection surface from `narrative.entry_point` (`input` → `user_turn`, `tool_execution` → `tool_return`). `threat_name` containing “supply chain” is `none` (no coverage).

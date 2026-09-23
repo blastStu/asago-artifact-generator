@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 from ..extract import ScenarioContext
@@ -36,6 +36,8 @@ class GenResult:
     gate_reason: str = ""
     artifact_path: str | None = None
     errors: list[str] | None = None
+    attempts: int = 0
+    attempt_failures: list[dict] = field(default_factory=list)
 
 
 def _trigger_tool(ctx: ScenarioContext) -> str:
@@ -132,6 +134,8 @@ def generate_artifact(
                 gate=gate_result,
                 gate_reason=gate_reason,
                 errors=build.errors,
+                attempts=build.attempts,
+                attempt_failures=build.attempt_failures,
             )
 
     if dry_run:
@@ -142,6 +146,8 @@ def generate_artifact(
             gate=gate_result,
             gate_reason=gate_reason,
             errors=build.errors if build.errors else None,
+            attempts=build.attempts,
+            attempt_failures=build.attempt_failures,
         )
 
     artifact_path = save_garak_artifact(
@@ -157,6 +163,8 @@ def generate_artifact(
         gate_reason=gate_reason,
         artifact_path=str(artifact_path),
         errors=build.errors if build.errors else None,
+        attempts=build.attempts,
+        attempt_failures=build.attempt_failures,
     )
 
 
