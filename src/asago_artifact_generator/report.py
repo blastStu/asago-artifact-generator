@@ -97,7 +97,16 @@ def _report_views(
         for entry in (run_log or {}).get("scenarios", [])
         if isinstance(entry, dict) and entry.get("scenario_id")
     }
-    scenario_ids = set(contexts) | set(manifest) | set(logged)
+    # A generation log is the authoritative scope for a report. The input
+    # directory can contain many scenarios that were not part of this run.
+    # Fall back to the manifest for runs created before generation logs were
+    # added, and only use all input scenarios when no run metadata exists.
+    if run_log is not None and "scenarios" in run_log:
+        scenario_ids = set(logged)
+    elif manifest:
+        scenario_ids = set(manifest)
+    else:
+        scenario_ids = set(contexts)
     views: list[dict[str, Any]] = []
 
     for scenario_id in sorted(scenario_ids):
@@ -512,7 +521,7 @@ def render_report(
             else "<p>No generation log was found for this report.</p>"
         )
         + "</section>"
-        + '<section class="panel"><h2>Scenarios</h2>'
+        + '<section class="panel"><h2>Scenarios in this run</h2>'
         + _explanation(
             "A scenario is the input threat model. Coverage describes how much of that "
             "threat Garak can express; validation describes whether the generated artifact "

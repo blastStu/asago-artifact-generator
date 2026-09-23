@@ -91,15 +91,16 @@ asago-artifact-generator generate -v
 
 ## HTML reports
 
-Build a self-contained, interactive report from the scenario YAMLs, generated
-artifacts, validation sidecars, and the latest generation log:
+Build a self-contained, interactive report for the latest generation run from
+its scenario records, generated artifacts, validation sidecars, and run log:
 
 ```bash
 asago-artifact-generator report --output runs/report.html
 ```
 
-Open `runs/report.html` in a browser. The report starts with a high-level
-summary, then lets readers expand each scenario to see the human-readable
+Open `runs/report.html` in a browser. The report contains only the scenarios
+recorded in that generation run. It starts with a high-level summary, then
+lets readers expand each scenario to see the human-readable
 threat description, transcript, highlighted adversarial turn, detector rubric,
 validation details, raw data, and explanations of what each section means.
 It embeds the Asago logo and has no external runtime dependencies.
@@ -109,6 +110,9 @@ Generation runs also write a timestamped, non-secret log under
 temperature, token limit, reasoning effort, scenario outcomes, attempt
 failures, validation errors, and durations. API keys, full prompts, and raw
 model responses are not written to the log.
+To report on a particular run, pass its log explicitly with `--run-log
+path/to/generation-log.json`; otherwise the newest log is selected. Older runs
+without logs use `manifest.json` as their scenario scope.
 
 ### Pipeline
 

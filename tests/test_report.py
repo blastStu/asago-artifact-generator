@@ -21,6 +21,11 @@ class TestReport(unittest.TestCase):
             runs = root / "runs"
             scenarios.mkdir()
             shutil.copyfile(source, scenarios / source.name)
+            other_source = scenarios / "AP-T17-01-00d278.yaml"
+            other_source.write_text(
+                source.read_text(encoding="utf-8").replace("AP-T2-01-28712e", "AP-T17-01-00d278"),
+                encoding="utf-8",
+            )
             artifact_dir = runs / "AP-T2-01-28712e"
             artifact_dir.mkdir(parents=True)
             artifact = {
@@ -97,6 +102,8 @@ class TestReport(unittest.TestCase):
         self.assertIn("&lt;script&gt;alert(1)&lt;/script&gt;", report)
         self.assertNotIn("<script>alert(1)</script>", report)
         self.assertIn("AP-T2-01-28712e", report)
+        self.assertNotIn("AP-T17-01-00d278", report)
+        self.assertIn("Scenarios in this run", report)
 
 
 if __name__ == "__main__":
