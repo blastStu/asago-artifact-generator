@@ -104,6 +104,10 @@ class TestReport(unittest.TestCase):
         self.assertIn("AP-T2-01-28712e", report)
         self.assertNotIn("AP-T17-01-00d278", report)
         self.assertIn("Scenarios in this run", report)
+        self.assertIn("taxonomy-drawer", report)
+        self.assertIn("taxonomy-tag", report)
+        self.assertIn("Improper Output Handling", report)
+        self.assertIn("Indirect Prompt Injection", report)
 
 
 if __name__ == "__main__":

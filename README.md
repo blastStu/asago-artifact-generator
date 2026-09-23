@@ -103,7 +103,9 @@ recorded in that generation run. It starts with a high-level summary, then
 lets readers expand each scenario to see the human-readable
 threat description, transcript, highlighted adversarial turn, detector rubric,
 validation details, raw data, and explanations of what each section means.
-It embeds the Asago logo and has no external runtime dependencies.
+Taxonomy tags are clickable: selecting one opens a sidebar with its framework,
+human-readable meaning, and reference source. It embeds the Asago logo and has
+no external runtime dependencies.
 
 Generation runs also write a timestamped, non-secret log under
 `runs/generation-log/`. It records the provider, sanitized endpoint, model,

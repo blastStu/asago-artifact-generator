@@ -22,6 +22,219 @@ from .garak.spec_io import (
 
 _LOGO_PATH = Path(__file__).with_name("report_assets") / "asago-main-logo-dark.svg"
 
+_TAXONOMY_GLOSSARY: dict[str, dict[str, str]] = {
+    "LLM01": {
+        "framework": "OWASP Top 10 for LLM Applications 2025",
+        "name": "Prompt Injection",
+        "description": "User or external content changes the model's intended behavior or output through malicious instructions.",
+        "source": "https://genai.owasp.org/llm-top-10/",
+    },
+    "LLM02": {
+        "framework": "OWASP Top 10 for LLM Applications 2025",
+        "name": "Sensitive Information Disclosure",
+        "description": "The model or its surrounding application exposes sensitive information through prompts, context, outputs, or connected systems.",
+        "source": "https://genai.owasp.org/llm-top-10/",
+    },
+    "LLM03": {
+        "framework": "OWASP Top 10 for LLM Applications 2025",
+        "name": "Supply Chain",
+        "description": "Third-party models, data, packages, adapters, or deployment components introduce integrity, security, or availability risks.",
+        "source": "https://genai.owasp.org/llmrisk/llm032025-supply-chain/",
+    },
+    "LLM04": {
+        "framework": "OWASP Top 10 for LLM Applications 2025",
+        "name": "Data and Model Poisoning",
+        "description": "Training, fine-tuning, embedding, or other model data is manipulated to introduce bias, backdoors, or unsafe behavior.",
+        "source": "https://genai.owasp.org/llm-top-10/",
+    },
+    "LLM05": {
+        "framework": "OWASP Top 10 for LLM Applications 2025",
+        "name": "Improper Output Handling",
+        "description": "Model output is passed downstream without sufficient validation, sanitization, encoding, or authorization checks.",
+        "source": "https://genai.owasp.org/llmrisk/llm052025-improper-output-handling/",
+    },
+    "LLM06": {
+        "framework": "OWASP Top 10 for LLM Applications 2025",
+        "name": "Excessive Agency",
+        "description": "The model has more functionality, permissions, or autonomy than necessary, allowing manipulated output to trigger damaging actions.",
+        "source": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/",
+    },
+    "LLM07": {
+        "framework": "OWASP Top 10 for LLM Applications 2025",
+        "name": "System Prompt Leakage",
+        "description": "System prompts or hidden instructions are disclosed, weakening security controls or revealing sensitive implementation details.",
+        "source": "https://genai.owasp.org/llm-top-10/",
+    },
+    "LLM08": {
+        "framework": "OWASP Top 10 for LLM Applications 2025",
+        "name": "Vector and Embedding Weaknesses",
+        "description": "Weaknesses in vector stores or embeddings allow retrieval manipulation, cross-context exposure, or poisoned context.",
+        "source": "https://genai.owasp.org/llm-top-10/",
+    },
+    "LLM09": {
+        "framework": "OWASP Top 10 for LLM Applications 2025",
+        "name": "Misinformation",
+        "description": "The model produces or amplifies false, misleading, or overconfident information that downstream users or systems rely on.",
+        "source": "https://genai.owasp.org/llm-top-10/",
+    },
+    "LLM10": {
+        "framework": "OWASP Top 10 for LLM Applications 2025",
+        "name": "Unbounded Consumption",
+        "description": "Uncontrolled model usage consumes excessive tokens, compute, money, or other resources and can cause denial of service.",
+        "source": "https://genai.owasp.org/llm-top-10/",
+    },
+    "T1": {
+        "framework": "OWASP Agentic AI threat taxonomy",
+        "name": "Memory Poisoning",
+        "description": "Attacker-controlled content corrupts short- or long-term agent memory so later decisions are influenced by false instructions or facts.",
+        "source": "https://agentic-threat-modeling.github.io/MAESTRO/playbook/12-quick-reference.html",
+    },
+    "T2": {
+        "framework": "OWASP Agentic AI threat taxonomy",
+        "name": "Tool Misuse",
+        "description": "An agent is manipulated into invoking a tool in an unsafe way or for a purpose outside the intended workflow.",
+        "source": "https://agentic-threat-modeling.github.io/MAESTRO/playbook/12-quick-reference.html",
+    },
+    "T3": {
+        "framework": "OWASP Agentic AI threat taxonomy",
+        "name": "Privilege Compromise",
+        "description": "An attacker obtains, abuses, or escalates the permissions available to an agent, tool, or connected identity.",
+        "source": "https://agentic-threat-modeling.github.io/MAESTRO/playbook/12-quick-reference.html",
+    },
+    "T4": {
+        "framework": "OWASP Agentic AI threat taxonomy",
+        "name": "Resource Overload",
+        "description": "Agent behavior exhausts compute, tokens, service capacity, or other resources through excessive or repeated activity.",
+        "source": "https://agentic-threat-modeling.github.io/MAESTRO/playbook/12-quick-reference.html",
+    },
+    "T5": {
+        "framework": "OWASP Agentic AI threat taxonomy",
+        "name": "Cascading Hallucinations",
+        "description": "An incorrect model output is accepted as context by later steps or agents and propagates through the workflow.",
+        "source": "https://agentic-threat-modeling.github.io/MAESTRO/playbook/12-quick-reference.html",
+    },
+    "T6": {
+        "framework": "OWASP Agentic AI threat taxonomy",
+        "name": "Intent Breaking & Goal Manipulation",
+        "description": "The agent's intended objective or constraints are redirected by adversarial instructions, context, or intermediate results.",
+        "source": "https://agentic-threat-modeling.github.io/MAESTRO/playbook/12-quick-reference.html",
+    },
+    "T7": {
+        "framework": "OWASP Agentic AI threat taxonomy",
+        "name": "Misaligned & Deceptive Behaviour",
+        "description": "Agent behavior departs from the user's or system's security objective, including deceptive or strategically misleading actions.",
+        "source": "https://agentic-threat-modeling.github.io/MAESTRO/playbook/12-quick-reference.html",
+    },
+    "T8": {
+        "framework": "OWASP Agentic AI threat taxonomy",
+        "name": "Repudiation & Untraceability",
+        "description": "Missing or unreliable provenance and audit trails make agent decisions or actions difficult to attribute and investigate.",
+        "source": "https://agentic-threat-modeling.github.io/MAESTRO/playbook/12-quick-reference.html",
+    },
+    "T9": {
+        "framework": "OWASP Agentic AI threat taxonomy",
+        "name": "Identity Spoofing",
+        "description": "An attacker impersonates a user, agent, service, or other trusted participant in an agentic workflow.",
+        "source": "https://agentic-threat-modeling.github.io/MAESTRO/playbook/12-quick-reference.html",
+    },
+    "T10": {
+        "framework": "OWASP Agentic AI threat taxonomy",
+        "name": "Overwhelming HITL",
+        "description": "Human reviewers are overloaded with volume, speed, or complexity until meaningful oversight becomes ineffective.",
+        "source": "https://agentic-threat-modeling.github.io/MAESTRO/playbook/12-quick-reference.html",
+    },
+    "T11": {
+        "framework": "OWASP Agentic AI threat taxonomy",
+        "name": "Unexpected RCE / Code Attacks",
+        "description": "Agent-generated or agent-invoked code causes unexpected command execution, code injection, or compromise of the runtime.",
+        "source": "https://agentic-threat-modeling.github.io/MAESTRO/playbook/12-quick-reference.html",
+    },
+    "T12": {
+        "framework": "OWASP Agentic AI threat taxonomy",
+        "name": "Agent Communication Poisoning",
+        "description": "Messages or shared artifacts exchanged between agents are manipulated to influence downstream decisions or actions.",
+        "source": "https://agentic-threat-modeling.github.io/MAESTRO/playbook/12-quick-reference.html",
+    },
+    "T13": {
+        "framework": "OWASP Agentic AI threat taxonomy",
+        "name": "Rogue Agents",
+        "description": "A compromised, malicious, or misbehaving agent acts against the interests of the wider system or its users.",
+        "source": "https://agentic-threat-modeling.github.io/MAESTRO/playbook/12-quick-reference.html",
+    },
+    "T14": {
+        "framework": "OWASP Agentic AI threat taxonomy",
+        "name": "Human Attacks on MAS",
+        "description": "People exploit the coordination, trust, or control relationships in a multi-agent system to cause harmful outcomes.",
+        "source": "https://agentic-threat-modeling.github.io/MAESTRO/playbook/12-quick-reference.html",
+    },
+    "T15": {
+        "framework": "OWASP Agentic AI threat taxonomy",
+        "name": "Human Trust Manipulation",
+        "description": "Agent outputs or behavior manipulate human trust, judgment, or approval decisions.",
+        "source": "https://agentic-threat-modeling.github.io/MAESTRO/playbook/12-quick-reference.html",
+    },
+    "T16": {
+        "framework": "OWASP Agentic AI threat taxonomy",
+        "name": "Insecure Inter-Agent Protocol Abuse",
+        "description": "Weaknesses in agent-to-agent protocols or trust negotiation are exploited to alter messages, identity, or delegated actions.",
+        "source": "https://genai.owasp.org/resource/agentic-ai-threats-and-mitigations/",
+    },
+    "T17": {
+        "framework": "OWASP Agentic AI threat taxonomy",
+        "name": "Supply Chain Compromise",
+        "description": "An agent, tool, model, package, or other dependency is compromised before or during integration into the system.",
+        "source": "https://genai.owasp.org/resource/agentic-ai-threats-and-mitigations/",
+    },
+    "AML.T0015": {
+        "framework": "MITRE ATLAS",
+        "name": "Evade AI Model",
+        "description": "Adversarial inputs are crafted to make an AI model misclassify, overlook, or mishandle meaningful content.",
+        "source": "https://atlas.mitre.org/techniques/AML.T0015/",
+    },
+    "AML.T0040": {
+        "framework": "MITRE ATLAS",
+        "name": "AI Model Inference API Access",
+        "description": "The adversary gains legitimate access to a model through its inference API to probe, stage, or influence attacks.",
+        "source": "https://atlas.mitre.org/techniques/AML.T0040/",
+    },
+    "AML.T0048": {
+        "framework": "MITRE ATLAS",
+        "name": "External Harms",
+        "description": "AI-enabled activity causes harm outside the model or application, including financial, reputational, or physical impact.",
+        "source": "https://atlas.mitre.org/techniques/AML.T0048/",
+    },
+    "AML.T0051": {
+        "framework": "MITRE ATLAS",
+        "name": "LLM Prompt Injection",
+        "description": "Crafted prompts cause an LLM to ignore intended instructions and follow adversary-controlled instructions instead.",
+        "source": "https://atlas.mitre.org/techniques/AML.T0051/",
+    },
+    "AML.T0051.000": {
+        "framework": "MITRE ATLAS",
+        "name": "Direct Prompt Injection",
+        "description": "The adversary injects malicious instructions directly into the LLM's input channel.",
+        "source": "https://atlas.mitre.org/techniques/AML.T0051.000/",
+    },
+    "AML.T0051.001": {
+        "framework": "MITRE ATLAS",
+        "name": "Indirect Prompt Injection",
+        "description": "Malicious instructions are hidden in external content, such as a document, website, message, or tool result that the LLM ingests.",
+        "source": "https://atlas.mitre.org/techniques/AML.T0051.001/",
+    },
+    "AML.T0053": {
+        "framework": "MITRE ATLAS",
+        "name": "AI Agent Tool Invocation",
+        "description": "The adversary causes an AI agent to invoke a tool or connected capability in an unintended or harmful way.",
+        "source": "https://atlas.mitre.org/techniques/AML.T0053/",
+    },
+    "AML.T0067": {
+        "framework": "MITRE ATLAS",
+        "name": "LLM Trusted Output Components Manipulation",
+        "description": "The response is shaped to look trustworthy by manipulating links, citations, metadata, follow-up actions, or other trust signals.",
+        "source": "https://atlas.mitre.org/techniques/AML.T0067/",
+    },
+}
+
 
 def _escape(value: Any) -> str:
     return html.escape(str(value if value not in (None, "") else "—"), quote=True)
@@ -200,7 +413,15 @@ def _render_tags(taxonomy: dict[str, Any]) -> str:
     for values in taxonomy.values():
         if isinstance(values, list):
             tags.extend(str(value) for value in values)
-    return " ".join(_badge(tag) for tag in dict.fromkeys(tags)) or "<span>—</span>"
+    buttons = []
+    for tag in dict.fromkeys(tags):
+        entry = _TAXONOMY_GLOSSARY.get(tag, {})
+        label = entry.get("name", "Open taxonomy details")
+        buttons.append(
+            f'<button type="button" class="taxonomy-tag" '
+            f'data-taxonomy-id="{_escape(tag)}" title="{_escape(label)}">{_escape(tag)}</button>'
+        )
+    return " ".join(buttons) or "<span>—</span>"
 
 
 def _render_steps(steps: list[dict[str, Any]]) -> str:
@@ -290,7 +511,12 @@ def _render_input(view: dict[str, Any]) -> str:
         f"<h4>Scenario summary</h4><p>{_escape(view['summary'])}</p>"
         "<h4>Narrative steps</h4>"
         f'<div class="steps">{_render_steps(view["steps"])}</div>'
-        f'<h4>Taxonomy tags</h4><div class="tags">{_render_tags(view["tags"])}</div>'
+        "<h4>Taxonomy tags</h4>"
+        + _explanation(
+            "These tags map the scenario to external threat and risk taxonomies. "
+            "Select a tag to open its name, meaning, and reference link."
+        )
+        + f'<div class="tags">{_render_tags(view["tags"])}</div>'
     )
 
 
@@ -414,6 +640,20 @@ def _settings_table(settings: dict[str, Any]) -> str:
     return "<table><tbody>" + "".join(rows) + "</tbody></table>"
 
 
+def _taxonomy_drawer() -> str:
+    return (
+        '<div id="taxonomy-backdrop" class="taxonomy-backdrop"></div>'
+        '<aside id="taxonomy-drawer" class="taxonomy-drawer" aria-hidden="true" '
+        'aria-labelledby="taxonomy-drawer-title">'
+        '<div class="taxonomy-drawer-header"><div><p class="eyebrow">Taxonomy reference</p>'
+        '<h2 id="taxonomy-drawer-title">Select a tag</h2></div>'
+        '<button type="button" id="taxonomy-close" class="taxonomy-close" aria-label="Close taxonomy details">×</button></div>'
+        '<div id="taxonomy-detail" class="taxonomy-detail">'
+        "<p>Click a taxonomy tag in a scenario to see what the identifier means.</p>"
+        "</div></aside>"
+    )
+
+
 def render_report(
     *,
     scenarios_dir: Path = Path("examples/scenarios"),
@@ -441,6 +681,7 @@ def render_report(
     settings = (run_log or {}).get("settings") or {}
     run_label = (run_log or {}).get("run_id") or "No persisted generation log found"
     scenario_html = "".join(_render_scenario(view) for view in views)
+    taxonomy_data = json.dumps(_TAXONOMY_GLOSSARY, ensure_ascii=False).replace("<", "\\u003c")
     css = """
       :root { --navy:#10243e; --blue:#4b85ff; --teal:#00cec6; --ink:#172033;
         --muted:#667085; --line:#dce3ee; --panel:#fff; --bg:#f5f8fc; }
@@ -466,6 +707,20 @@ def render_report(
       .badge { display:inline-block; border-radius:999px; background:#eef2f7; color:#475467; padding:2px 9px; margin:2px 3px 2px 0; font-size:12px; font-weight:650; text-transform:capitalize; }
       .badge.success { background:#dcfae6; color:#067647; } .badge.failure,.badge.danger { background:#fee4e2; color:#b42318; }
       .badge.skip { background:#fff1c2; color:#8b5e00; } .badge.coverage { background:#e6f0ff; color:#2455b8; }
+      .taxonomy-tag { border:1px solid #b8c8e1; border-radius:999px; background:#f4f7fc; color:#2455b8; cursor:pointer; padding:3px 10px; margin:2px 3px 2px 0; font:650 12px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace; }
+      .taxonomy-tag:hover,.taxonomy-tag:focus-visible { background:#e6f0ff; border-color:#4b85ff; outline:2px solid #b8d0ff; outline-offset:1px; }
+      .taxonomy-backdrop { display:none; position:fixed; inset:0; z-index:20; background:#10243e66; }
+      .taxonomy-backdrop.open { display:block; }
+      .taxonomy-drawer { position:fixed; z-index:30; top:0; right:0; width:min(460px,92vw); height:100vh; overflow:auto; padding:24px; background:#fff; box-shadow:-8px 0 30px #10243e33; transform:translateX(105%); transition:transform .2s ease; }
+      .taxonomy-drawer.open { transform:translateX(0); }
+      .taxonomy-drawer-header { display:flex; justify-content:space-between; gap:18px; align-items:flex-start; border-bottom:1px solid var(--line); padding-bottom:16px; }
+      .taxonomy-drawer h2 { margin:0; font-size:24px; } .eyebrow { margin:0 0 5px; color:var(--blue); font-size:12px; font-weight:750; letter-spacing:.08em; text-transform:uppercase; }
+      .taxonomy-close { border:0; background:transparent; color:var(--muted); cursor:pointer; font-size:30px; line-height:1; padding:0 4px; }
+      .taxonomy-close:hover,.taxonomy-close:focus-visible { color:var(--navy); outline:2px solid #b8d0ff; border-radius:5px; }
+      .taxonomy-detail { padding-top:20px; } .taxonomy-detail h3 { margin:0 0 8px; color:var(--navy); font-size:21px; }
+      .taxonomy-detail .taxonomy-code { color:var(--blue); font:700 13px ui-monospace,SFMono-Regular,Menlo,monospace; }
+      .taxonomy-detail .taxonomy-framework { color:var(--muted); font-weight:650; }
+      .taxonomy-detail .taxonomy-description { margin:18px 0; } .taxonomy-detail a { color:#2455b8; font-weight:650; }
       .facts { display:grid; grid-template-columns:minmax(130px,220px) 1fr; margin:0; } .facts dt,.facts dd { border-bottom:1px solid var(--line); padding:8px 0; }
       .facts dt { color:var(--muted); font-weight:650; } .facts dd { margin:0; } .steps { display:grid; gap:10px; }
       .step { border:1px solid var(--line); border-radius:9px; padding:12px 14px; } .step p { margin:8px 0 0; } .step-heading { display:flex; gap:6px; align-items:center; }
@@ -485,6 +740,54 @@ def render_report(
         const needle = filter.value.trim().toLowerCase();
         cards.forEach(card => { card.hidden = needle && !card.dataset.search.toLowerCase().includes(needle); });
       });
+      const taxonomy = JSON.parse(document.querySelector('#taxonomy-data').textContent);
+      const drawer = document.querySelector('#taxonomy-drawer');
+      const backdrop = document.querySelector('#taxonomy-backdrop');
+      const closeButton = document.querySelector('#taxonomy-close');
+      const detail = document.querySelector('#taxonomy-detail');
+      const closeTaxonomy = () => {
+        drawer.classList.remove('open');
+        backdrop.classList.remove('open');
+        drawer.setAttribute('aria-hidden', 'true');
+      };
+      const openTaxonomy = id => {
+        const item = taxonomy[id] || {
+          framework: 'Unmapped taxonomy identifier',
+          name: 'No bundled description',
+          description: 'This identifier is present in the scenario metadata, but this report does not yet include a glossary entry for it.',
+          source: ''
+        };
+        document.querySelector('#taxonomy-drawer-title').textContent = item.name;
+        detail.replaceChildren();
+        const code = document.createElement('p');
+        code.className = 'taxonomy-code';
+        code.textContent = id;
+        const framework = document.createElement('p');
+        framework.className = 'taxonomy-framework';
+        framework.textContent = item.framework;
+        const description = document.createElement('p');
+        description.className = 'taxonomy-description';
+        description.textContent = item.description;
+        detail.append(code, framework, description);
+        if (item.source) {
+          const source = document.createElement('a');
+          source.href = item.source;
+          source.target = '_blank';
+          source.rel = 'noopener noreferrer';
+          source.textContent = 'Open reference source';
+          detail.append(source);
+        }
+        drawer.classList.add('open');
+        backdrop.classList.add('open');
+        drawer.setAttribute('aria-hidden', 'false');
+        closeButton.focus();
+      };
+      document.querySelectorAll('.taxonomy-tag').forEach(tag => {
+        tag.addEventListener('click', () => openTaxonomy(tag.dataset.taxonomyId));
+      });
+      closeButton.addEventListener('click', closeTaxonomy);
+      backdrop.addEventListener('click', closeTaxonomy);
+      document.addEventListener('keydown', event => { if (event.key === 'Escape') closeTaxonomy(); });
     """
     return (
         '<!doctype html><html lang="en"><head><meta charset="utf-8">'
@@ -530,7 +833,9 @@ def render_report(
         + '<div class="toolbar"><input id="scenario-filter" type="search" placeholder="Filter by ID, title, threat, or mechanism…"></div>'
         + (scenario_html or "<p>No scenarios or artifacts were found.</p>")
         + "</section><footer>Generated by Asago Artifact Generator. AI-generated content is disclosed in each artifact.</footer>"
-        + "</main><script>"
+        + "</main>"
+        + _taxonomy_drawer()
+        + f'<script type="application/json" id="taxonomy-data">{taxonomy_data}</script><script>'
         + javascript
         + "</script></body></html>"
     )
